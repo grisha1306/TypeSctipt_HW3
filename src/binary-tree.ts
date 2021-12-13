@@ -45,9 +45,30 @@ class TreeNode<V, K> {
     }
 }
 
+type compare<K> = ( a: K, b : K) => number;
+
 export class BinaryTree<V,K> {
 
     private _root: TreeNode<V,K> | null;
+    private readonly _comparator : compare<K>;
+
+    constructor(comparator? : compare<K>) {
+        this._root = null;
+        if ( comparator )
+            this._comparator = comparator;
+        else {
+            this._comparator = (a : K , b: K ) => {
+                if ( a > b) {
+                    return 1;
+                }
+                else if ( a < b ) {
+                    return -1;
+                }
+                else
+                    return 0;
+            }
+        }
+    }
 
     get root(): TreeNode<V, K> | null {
         return this._root;
@@ -55,10 +76,6 @@ export class BinaryTree<V,K> {
 
     set root(value: TreeNode<V, K> | null) {
         this._root = value;
-    }
-
-    constructor() {
-        this._root = null;
     }
 
     insert (value: V, key : K) : void {
@@ -73,8 +90,7 @@ export class BinaryTree<V,K> {
     }
 
     private insertIntoCurrentNode (node: TreeNode<V,K> , currentNode : TreeNode<V,K>) : void {
-        let key  = currentNode.key;
-        if (key > node.key) {
+        if (this._comparator(currentNode.key, node.key) > 0) {
             if (node.right === null) {
                 node.right = currentNode;
                 // console.log("Insert right")
@@ -84,7 +100,7 @@ export class BinaryTree<V,K> {
                     // console.log("Insert right")
                 }
 
-        } else if (key < node.key) {
+        } else if (this._comparator(currentNode.key, node.key) < 0) {
             if (!node.left) {
                 node.left = currentNode
                 // console.log("Insert left")
@@ -98,10 +114,11 @@ export class BinaryTree<V,K> {
     search  (node : TreeNode<V, K> | null , key: K) : TreeNode<V, K> | null {
         if (node === null) return null;
 
-        if ( key === node.key)
+        // if ( key === node.key)
+        if ( this._comparator(key, node.key) === 0)
             return node;
 
-        if (key > node.key) {
+        if (this._comparator(key, node.key) > 0 ) {
             return this.search(node.right, key);
         } else
             return this.search(node.left, key);
@@ -122,10 +139,10 @@ export class BinaryTree<V,K> {
     private removeNode (node : TreeNode<V, K> | null, key : K) : TreeNode<V, K> | null {
         if (node === null) {
             return null;
-        } else if (key < node.key) {
+        } else if (this._comparator(key, node.key) < 0) {
             node.left = this.removeNode(node.left, key);
             return node;
-        } else if (key > node.key) {
+        } else if (this._comparator(key, node.key) > 0) {
             node.right = this.removeNode(node.right, key);
             return node;
         } else {

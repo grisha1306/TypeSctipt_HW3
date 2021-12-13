@@ -31,8 +31,22 @@ class TreeNode {
     }
 }
 export class BinaryTree {
-    constructor() {
+    constructor(comparator) {
         this._root = null;
+        if (comparator)
+            this._comparator = comparator;
+        else {
+            this._comparator = (a, b) => {
+                if (a > b) {
+                    return 1;
+                }
+                else if (a < b) {
+                    return -1;
+                }
+                else
+                    return 0;
+            };
+        }
     }
     get root() {
         return this._root;
@@ -51,8 +65,7 @@ export class BinaryTree {
         }
     }
     insertIntoCurrentNode(node, currentNode) {
-        let key = currentNode.key;
-        if (key > node.key) {
+        if (this._comparator(currentNode.key, node.key) > 0) {
             if (node.right === null) {
                 node.right = currentNode;
                 // console.log("Insert right")
@@ -62,7 +75,7 @@ export class BinaryTree {
                 // console.log("Insert right")
             }
         }
-        else if (key < node.key) {
+        else if (this._comparator(currentNode.key, node.key) < 0) {
             if (!node.left) {
                 node.left = currentNode;
                 // console.log("Insert left")
@@ -75,9 +88,10 @@ export class BinaryTree {
     search(node, key) {
         if (node === null)
             return null;
-        if (key === node.key)
+        // if ( key === node.key)
+        if (this._comparator(key, node.key) === 0)
             return node;
-        if (key > node.key) {
+        if (this._comparator(key, node.key) > 0) {
             return this.search(node.right, key);
         }
         else
@@ -96,11 +110,11 @@ export class BinaryTree {
         if (node === null) {
             return null;
         }
-        else if (key < node.key) {
+        else if (this._comparator(key, node.key) < 0) {
             node.left = this.removeNode(node.left, key);
             return node;
         }
-        else if (key > node.key) {
+        else if (this._comparator(key, node.key) > 0) {
             node.right = this.removeNode(node.right, key);
             return node;
         }
